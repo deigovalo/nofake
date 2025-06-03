@@ -18,7 +18,7 @@ Sigue estos pasos para ejecutar la aplicación en tu máquina local:
 
 1. **Clona el repositorio**
    ```
-   git clone https://github.com/tu_usuario/nofake.git
+   git clone https://github.com/deigovalo/nofake.git
    cd nofake
 2. **Instala las dependencias**
 
