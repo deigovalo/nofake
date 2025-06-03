@@ -17,17 +17,19 @@
 Sigue estos pasos para ejecutar la aplicación en tu máquina local:
 
 1. **Clona el repositorio**
-   ```bash
+   ```
    git clone https://github.com/tu_usuario/nofake.git
    cd nofake
 2. **Instala las dependencias**
 
-   ```bash
+   ```
    npm install
 3. **Configura la API Key**
    - Crea un archivo llamado .env en la raíz del proyecto.
    - Añade tu clave API de Google Generative AI:
-   ```GOOGLE_GENERATIVE_AI_API_KEY=TU_API_KEY
+   ```
+   - GOOGLE_GENERATIVE_AI_API_KEY=TU_API_KEY
+   ```
    - Puedes obtener tu API Key desde 👉 Google AI Studio
 
 4. Inicia la aplicación
