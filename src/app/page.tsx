@@ -144,14 +144,8 @@ export default function NoFake() {
               <a href="#" className="text-gray-700 hover:text-purple-600">
                 Cómo Funciona
               </a>
-              <a href="#" className="text-gray-700 hover:text-purple-600">
-                Estadísticas
-              </a>
-              <a href="#" className="text-gray-700 hover:text-purple-600">
-                API
-              </a>
             </nav>
-            <Button variant="outline">Iniciar Sesión</Button>
+            <Button variant="outline">Iniciar Sesión (WIP)</Button>
           </div>
         </div>
       </header>
@@ -360,34 +354,6 @@ export default function NoFake() {
         </div>
       </section>
 
-      {/* Stats Section */}
-      <section className="py-20 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Estadísticas de Verificación</h2>
-          </div>
-
-          <div className="grid md:grid-cols-4 gap-8">
-            <div className="text-center">
-              <div className="text-4xl font-bold text-purple-600 mb-2">2.5M+</div>
-              <div className="text-gray-600">Textos Verificados</div>
-            </div>
-            <div className="text-center">
-              <div className="text-4xl font-bold text-green-600 mb-2">94%</div>
-              <div className="text-gray-600">Precisión de Detección</div>
-            </div>
-            <div className="text-center">
-              <div className="text-4xl font-bold text-blue-600 mb-2">150K+</div>
-              <div className="text-gray-600">Usuarios Activos</div>
-            </div>
-            <div className="text-center">
-              <div className="text-4xl font-bold text-orange-600 mb-2">24/7</div>
-              <div className="text-gray-600">Monitoreo Continuo</div>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* Footer */}
       <footer className="bg-gray-900 text-white py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -404,19 +370,15 @@ export default function NoFake() {
               <ul className="space-y-2 text-gray-400">
                 <li>
                   <a href="#" className="hover:text-white">
-                    Verificador
+                    Verificador (WIP)
                   </a>
                 </li>
                 <li>
                   <a href="#" className="hover:text-white">
-                    API
+                    API (WIP)
                   </a>
                 </li>
-                <li>
-                  <a href="#" className="hover:text-white">
-                    Extensión
-                  </a>
-                </li>
+
               </ul>
             </div>
             <div>
@@ -424,17 +386,12 @@ export default function NoFake() {
               <ul className="space-y-2 text-gray-400">
                 <li>
                   <a href="#" className="hover:text-white">
-                    Documentación
+                    Documentación (WIP)
                   </a>
                 </li>
                 <li>
                   <a href="#" className="hover:text-white">
-                    Blog
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-white">
-                    Soporte
+                    Soporte (WIP)
                   </a>
                 </li>
               </ul>
@@ -444,17 +401,7 @@ export default function NoFake() {
               <ul className="space-y-2 text-gray-400">
                 <li>
                   <a href="#" className="hover:text-white">
-                    Acerca de
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-white">
-                    Privacidad
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-white">
-                    Términos
+                    Acerca de (WIP)
                   </a>
                 </li>
               </ul>
