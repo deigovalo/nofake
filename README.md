@@ -1,6 +1,46 @@
-###NoFake
-NoFake es una pagina que para revisar al la informacion de un texto usando AI para verificar su credibilidad
+# 🧠 NoFake
 
-Pasos de como ejecutar esto:
-1. Abre la terminal y ejecuta "npm install"
-2. Crear un archivo .env y colocar tu api key GOOGLE_GENERATIVE_AI_API_KEY=XXXXXXX se consigue aqui https://aistudio.google.com/
+**NoFake** es una aplicación web que utiliza inteligencia artificial para **verificar la credibilidad de la información contenida en textos**. Su objetivo es ayudar a los usuarios a detectar posibles noticias falsas o contenidos dudosos mediante el análisis de lenguaje natural.
+
+---
+
+## 🌐 Características
+
+- ✅ Revisión automática de textos usando AI
+- 🔍 Evaluación de credibilidad de la información
+- 🤖 Integración con Google Generative AI
+
+---
+
+## 🚀 ¿Cómo ejecutar el proyecto?
+
+Sigue estos pasos para ejecutar la aplicación en tu máquina local:
+
+1. **Clona el repositorio**
+   ```bash
+   git clone https://github.com/tu_usuario/nofake.git
+   cd nofake
+Instala las dependencias
+
+bash
+Copiar
+Editar
+npm install
+Configura la API Key
+
+Crea un archivo llamado .env en la raíz del proyecto.
+
+Añade tu clave API de Google Generative AI:
+
+env
+Copiar
+Editar
+GOOGLE_GENERATIVE_AI_API_KEY=TU_API_KEY
+Puedes obtener tu API Key desde 👉 Google AI Studio
+
+Inicia la aplicación
+
+bash
+Copiar
+Editar
+npm run dev
