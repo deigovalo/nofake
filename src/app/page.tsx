@@ -1,13 +1,27 @@
 "use client"
 
 import { useState } from "react"
-import { Shield, CheckCircle, AlertTriangle, XCircle, Clock, Loader2, FileText, Brain } from "lucide-react"
+import {
+  Shield,
+  CheckCircle,
+  AlertTriangle,
+  XCircle,
+  Clock,
+  Loader2,
+  FileText,
+  Brain,
+  BookOpen,
+  Copy,
+  ExternalLink,
+} from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Separator } from "@/components/ui/separator"
 
 interface AnalysisResult {
   credibilityScore: number
@@ -27,6 +41,25 @@ interface AnalysisResult {
   warnings: string[]
 }
 
+interface Citation {
+  authors: string[]
+  title: string
+  journal: string
+  year: number
+  doi: string
+  url: string
+  abstract: string
+  type: string
+  formatted: string
+}
+
+interface CitationsResult {
+  citations: Citation[]
+  format: string
+  topic: string
+  generatedAt: string
+}
+
 // Ejemplos de texto para testing
 const EXAMPLE_TEXTS = [
   "El gobierno anunció nuevas medidas económicas para combatir la inflación. Según el ministro de economía, estas políticas buscan estabilizar los precios.",
@@ -40,12 +73,21 @@ export default function NoFake() {
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null)
   const [error, setError] = useState<string | null>(null)
 
+  // Estados para citas
+  const [showCitations, setShowCitations] = useState(false)
+  const [isLoadingCitations, setIsLoadingCitations] = useState(false)
+  const [citations, setCitations] = useState<CitationsResult | null>(null)
+  const [citationFormat, setCitationFormat] = useState<"apa7" | "ieee">("apa7")
+  const [citationError, setCitationError] = useState<string | null>(null)
+
   const handleAnalyze = async () => {
     if (!inputValue.trim()) return
 
     setIsAnalyzing(true)
     setError(null)
     setAnalysisResult(null)
+    setShowCitations(false)
+    setCitations(null)
 
     try {
       const response = await fetch("/api/verify", {
@@ -70,6 +112,46 @@ export default function NoFake() {
     } finally {
       setIsAnalyzing(false)
     }
+  }
+
+  const handleSearchCitations = async () => {
+    if (!analysisResult || !inputValue.trim()) return
+
+    setIsLoadingCitations(true)
+    setCitationError(null)
+
+    try {
+      // Extraer tema principal del texto para buscar citas
+      const topic = inputValue.trim().substring(0, 100)
+
+      const response = await fetch("/api/citations", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          topic,
+          format: citationFormat,
+        }),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || "Error al buscar citas")
+      }
+
+      const result = await response.json()
+      setCitations(result)
+      setShowCitations(true)
+    } catch (err) {
+      setCitationError(err instanceof Error ? err.message : "Error desconocido")
+    } finally {
+      setIsLoadingCitations(false)
+    }
+  }
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text)
   }
 
   const getStatusColor = (status: string) => {
@@ -144,8 +226,14 @@ export default function NoFake() {
               <a href="#" className="text-gray-700 hover:text-purple-600">
                 Cómo Funciona
               </a>
+              <a href="#" className="text-gray-700 hover:text-purple-600">
+                Estadísticas
+              </a>
+              <a href="#" className="text-gray-700 hover:text-purple-600">
+                API
+              </a>
             </nav>
-            <Button variant="outline">Iniciar Sesión (WIP)</Button>
+            <Button variant="outline">Iniciar Sesión</Button>
           </div>
         </div>
       </header>
@@ -239,6 +327,50 @@ export default function NoFake() {
                 {/* Status Badge */}
                 <div className="flex justify-center">{getStatusBadge(analysisResult.status)}</div>
 
+                {/* Botón de Buscar Citas - Solo si está verificado */}
+                {analysisResult.status === "verified" && (
+                  <div className="text-center">
+                    <Separator className="my-4" />
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-center gap-4">
+                        <Select
+                          value={citationFormat}
+                          onValueChange={(value: "apa7" | "ieee") => setCitationFormat(value)}
+                        >
+                          <SelectTrigger className="w-32">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="apa7">APA 7</SelectItem>
+                            <SelectItem value="ieee">IEEE</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <Button
+                          onClick={handleSearchCitations}
+                          disabled={isLoadingCitations}
+                          variant="outline"
+                          className="flex items-center gap-2"
+                        >
+                          {isLoadingCitations ? (
+                            <>
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                              Buscando...
+                            </>
+                          ) : (
+                            <>
+                              <BookOpen className="w-4 h-4" />
+                              Buscar Citas
+                            </>
+                          )}
+                        </Button>
+                      </div>
+                      <p className="text-sm text-gray-600">
+                        Encuentra citas académicas relacionadas con este contenido verificado
+                      </p>
+                    </div>
+                  </div>
+                )}
+
                 {/* Analysis Details */}
                 <div className="grid md:grid-cols-2 gap-6">
                   <div>
@@ -301,6 +433,59 @@ export default function NoFake() {
               </CardContent>
             </Card>
           )}
+
+          {/* Citation Error */}
+          {citationError && (
+            <Alert className="max-w-4xl mx-auto mt-4" variant="destructive">
+              <XCircle className="h-4 w-4" />
+              <AlertDescription>{citationError}</AlertDescription>
+            </Alert>
+          )}
+
+          {/* Citations Results */}
+          {showCitations && citations && (
+            <Card className="max-w-4xl mx-auto mt-8">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <BookOpen className="w-5 h-5 text-blue-600" />
+                  Citas Académicas - Formato {citations.format.toUpperCase()}
+                </CardTitle>
+                <CardDescription>Citas relacionadas con el contenido verificado</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {citations.citations.map((citation, index) => (
+                  <div key={index} className="border rounded-lg p-4 space-y-3">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <h4 className="font-semibold text-sm mb-2">{citation.title}</h4>
+                        <p className="text-xs text-gray-600 mb-2">
+                          {citation.authors.join(", ")} ({citation.year})
+                        </p>
+                        <p className="text-xs text-gray-500 mb-3">{citation.abstract}</p>
+                        <div className="bg-gray-50 p-3 rounded text-sm font-mono">{citation.formatted}</div>
+                      </div>
+                      <div className="flex flex-col gap-2 ml-4">
+                        <Button size="sm" variant="outline" onClick={() => copyToClipboard(citation.formatted)}>
+                          <Copy className="w-3 h-3" />
+                        </Button>
+                        <Button size="sm" variant="outline" asChild>
+                          <a href={citation.url} target="_blank" rel="noopener noreferrer">
+                            <ExternalLink className="w-3 h-3" />
+                          </a>
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+
+                <div className="text-center pt-4">
+                  <p className="text-xs text-gray-500">
+                    Citas generadas el {new Date(citations.generatedAt).toLocaleString()}
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </div>
       </section>
 
@@ -342,11 +527,11 @@ export default function NoFake() {
             <Card>
               <CardHeader>
                 <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
-                  <Brain className="w-6 h-6 text-blue-600" />
+                  <BookOpen className="w-6 h-6 text-blue-600" />
                 </div>
-                <CardTitle>IA Avanzada</CardTitle>
+                <CardTitle>Citas Académicas</CardTitle>
                 <CardDescription>
-                  Utilizamos modelos de inteligencia artificial para evaluar la credibilidad y veracidad del contenido.
+                  Para contenido verificado, proporcionamos citas académicas relevantes en formato APA7 o IEEE.
                 </CardDescription>
               </CardHeader>
             </Card>
@@ -370,15 +555,9 @@ export default function NoFake() {
               <ul className="space-y-2 text-gray-400">
                 <li>
                   <a href="#" className="hover:text-white">
-                    Verificador (WIP)
+                    API
                   </a>
                 </li>
-                <li>
-                  <a href="#" className="hover:text-white">
-                    API (WIP)
-                  </a>
-                </li>
-
               </ul>
             </div>
             <div>
@@ -386,12 +565,7 @@ export default function NoFake() {
               <ul className="space-y-2 text-gray-400">
                 <li>
                   <a href="#" className="hover:text-white">
-                    Documentación (WIP)
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-white">
-                    Soporte (WIP)
+                    Documentación
                   </a>
                 </li>
               </ul>
@@ -401,7 +575,7 @@ export default function NoFake() {
               <ul className="space-y-2 text-gray-400">
                 <li>
                   <a href="#" className="hover:text-white">
-                    Acerca de (WIP)
+                    Acerca de
                   </a>
                 </li>
               </ul>
