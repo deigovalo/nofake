@@ -35,3 +35,4 @@ Sigue estos pasos para ejecutar la aplicación en tu máquina local:
 4. Inicia la aplicación
    ```
    npm run dev
+
