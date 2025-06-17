@@ -1,19 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import {
-  Shield,
-  CheckCircle,
-  AlertTriangle,
-  XCircle,
-  Clock,
-  Loader2,
-  FileText,
-  Brain,
-  BookOpen,
-  Copy,
-  ExternalLink,
-} from "lucide-react"
+import { Shield, CheckCircle, AlertTriangle, XCircle, Clock, Loader2, FileText, Brain, BookOpen, Copy, ExternalLink, Search, Lightbulb } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea"
@@ -51,12 +39,16 @@ interface Citation {
   abstract: string
   type: string
   formatted: string
+  relevance?: string
+  keyFindings?: string[]
 }
 
 interface CitationsResult {
   citations: Citation[]
   format: string
   topic: string
+  analyzedText: string
+  searchQuery: string
   generatedAt: string
 }
 
@@ -132,6 +124,7 @@ export default function NoFake() {
         body: JSON.stringify({
           topic,
           format: citationFormat,
+          analyzedText: inputValue.trim(), // Enviar el texto completo para análisis
         }),
       })
 
@@ -247,8 +240,7 @@ export default function NoFake() {
             Verificador de Contenido
           </h1>
           <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-            Utiliza inteligencia artificial avanzada para verificar la veracidad de noticias, tweets y contenido digital
-            en tiempo real.
+            Utiliza inteligencia artificial verificar contenido y encontrar informacion relacionada.
           </p>
 
           {/* Main Analysis Tool */}
@@ -358,14 +350,14 @@ export default function NoFake() {
                             </>
                           ) : (
                             <>
-                              <BookOpen className="w-4 h-4" />
-                              Buscar Citas
+                              <Search className="w-4 h-4" />
+                              Buscar Literatura Académica
                             </>
                           )}
                         </Button>
                       </div>
                       <p className="text-sm text-gray-600">
-                        Encuentra citas académicas relacionadas con este contenido verificado
+                        Encuentra investigación académica específicamente relacionada con este contenido
                       </p>
                     </div>
                   </div>
@@ -378,22 +370,22 @@ export default function NoFake() {
                     <div className="space-y-2 text-sm">
                       <div className="flex justify-between">
                         <span>Sesgo Detectado:</span>
-                        <span>{analysisResult.analysis.biasScore}%</span>
+                        <span>{analysisResult.analysis?.biasScore || 0}%</span>
                       </div>
                       <div className="flex justify-between">
                         <span>Afirmaciones Totales:</span>
-                        <span>{analysisResult.analysis.factualClaims}</span>
+                        <span>{analysisResult.analysis?.factualClaims || 0}</span>
                       </div>
                       <div className="flex justify-between">
                         <span>Afirmaciones Verificadas:</span>
-                        <span className="text-green-600">{analysisResult.analysis.verifiedClaims}</span>
+                        <span className="text-green-600">{analysisResult.analysis?.verifiedClaims || 0}</span>
                       </div>
                       <div className="flex justify-between">
                         <span>Sentimiento:</span>
-                        <span className="capitalize">{analysisResult.analysis.sentiment}</span>
+                        <span className="capitalize">{analysisResult.analysis?.sentiment || "neutral"}</span>
                       </div>
                     </div>
-                    {analysisResult.analysis.reasoning && (
+                    {analysisResult.analysis?.reasoning && (
                       <div className="mt-4 p-3 bg-gray-50 rounded-lg">
                         <p className="text-sm text-gray-700">
                           <strong>Razonamiento:</strong> {analysisResult.analysis.reasoning}
@@ -403,22 +395,33 @@ export default function NoFake() {
                   </div>
 
                   <div>
-                    <h4 className="font-semibold mb-3">Fuentes de Verificación</h4>
+                    <h4 className="font-semibold mb-3">Posible(s) Fuente de origen</h4>
                     <div className="space-y-2">
-                      {analysisResult.sources.map((source, index) => (
-                        <div key={index} className="flex items-center justify-between text-sm">
-                          <div className="flex items-center gap-2">
-                            <span className={getStatusColor(source.status)}>{getStatusIcon(source.status)}</span>
-                            <span>{source.name}</span>
+                      {analysisResult.sources && analysisResult.sources.length > 0 ? (
+                        analysisResult.sources.map((source, index) => (
+                          <div key={index} className="flex items-center justify-between text-sm">
+                            <div className="flex items-center gap-2">
+                              <span className={getStatusColor(source.status)}>{getStatusIcon(source.status)}</span>
+                              <a
+                                href={source.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="hover:underline text-blue-600"
+                              >
+                                {source.name}
+                              </a>
+                            </div>
                           </div>
-                        </div>
-                      ))}
+                        ))
+                      ) : (
+                        <p className="text-sm text-gray-500">No se encontraron fuentes específicas</p>
+                      )}
                     </div>
                   </div>
                 </div>
 
                 {/* Warnings */}
-                {analysisResult.warnings.length > 0 && (
+                {analysisResult.warnings && analysisResult.warnings.length > 0 && (
                   <Alert>
                     <AlertTriangle className="h-4 w-4" />
                     <AlertDescription>
@@ -448,39 +451,87 @@ export default function NoFake() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <BookOpen className="w-5 h-5 text-blue-600" />
-                  Citas Académicas - Formato {citations.format.toUpperCase()}
+                  Literatura Académica Relacionada - Formato {citations.format.toUpperCase()}
                 </CardTitle>
-                <CardDescription>Citas relacionadas con el contenido verificado</CardDescription>
+                <CardDescription>
+                  <div className="flex items-center gap-2 mt-2">
+                    <Search className="w-4 h-4" />
+                    <span>Búsqueda: {citations.searchQuery || "Búsqueda relacionada"}</span>
+                  </div>
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                {citations.citations.map((citation, index) => (
-                  <div key={index} className="border rounded-lg p-4 space-y-3">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <h4 className="font-semibold text-sm mb-2">{citation.title}</h4>
-                        <p className="text-xs text-gray-600 mb-2">
-                          {citation.authors.join(", ")} ({citation.year})
-                        </p>
-                        <p className="text-xs text-gray-500 mb-3">{citation.abstract}</p>
-                        <div className="bg-gray-50 p-3 rounded text-sm font-mono">{citation.formatted}</div>
-                      </div>
-                      <div className="flex flex-col gap-2 ml-4">
-                        <Button size="sm" variant="outline" onClick={() => copyToClipboard(citation.formatted)}>
-                          <Copy className="w-3 h-3" />
-                        </Button>
-                        <Button size="sm" variant="outline" asChild>
-                          <a href={citation.url} target="_blank" rel="noopener noreferrer">
-                            <ExternalLink className="w-3 h-3" />
-                          </a>
-                        </Button>
+                {citations.citations && citations.citations.length > 0 ? (
+                  citations.citations.map((citation, index) => (
+                    <div key={index} className="border rounded-lg p-4 space-y-4">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <h4 className="font-semibold text-sm mb-2">{citation.title || "Título no disponible"}</h4>
+                          <p className="text-xs text-gray-600 mb-2">
+                            {citation.authors && citation.authors.length > 0
+                              ? citation.authors.join(", ")
+                              : "Autores no disponibles"}{" "}
+                            ({citation.year || "Año no disponible"})
+                          </p>
+                          <p className="text-xs text-gray-500 mb-3">
+                            {citation.abstract || "Resumen no disponible"}
+                          </p>
+
+                          {/* Relevancia específica */}
+                          {citation.relevance && (
+                            <div className="mb-3 p-2 bg-blue-50 rounded">
+                              <div className="flex items-center gap-1 mb-1">
+                                <Lightbulb className="w-3 h-3 text-blue-600" />
+                                <span className="text-xs font-medium text-blue-800">
+                                  Relevancia para el texto analizado:
+                                </span>
+                              </div>
+                              <p className="text-xs text-blue-700">{citation.relevance}</p>
+                            </div>
+                          )}
+
+                          {/* Hallazgos clave */}
+                          {citation.keyFindings && citation.keyFindings.length > 0 && (
+                            <div className="mb-3">
+                              <p className="text-xs font-medium text-gray-700 mb-1">Hallazgos clave:</p>
+                              <ul className="text-xs text-gray-600 list-disc list-inside space-y-1">
+                                {citation.keyFindings.map((finding, idx) => (
+                                  <li key={idx}>{finding}</li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+
+                          <div className="bg-gray-50 p-3 rounded text-sm font-mono">
+                            {citation.formatted || "Formato de cita no disponible"}
+                          </div>
+                        </div>
+                        <div className="flex flex-col gap-2 ml-4">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => copyToClipboard(citation.formatted || "")}
+                          >
+                            <Copy className="w-3 h-3" />
+                          </Button>
+                          {citation.url && (
+                            <Button size="sm" variant="outline" asChild>
+                              <a href={citation.url} target="_blank" rel="noopener noreferrer">
+                                <ExternalLink className="w-3 h-3" />
+                              </a>
+                            </Button>
+                          )}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  ))
+                ) : (
+                  <p className="text-center text-gray-500">No se encontraron citas académicas</p>
+                )}
 
                 <div className="text-center pt-4">
                   <p className="text-xs text-gray-500">
-                    Citas generadas el {new Date(citations.generatedAt).toLocaleString()}
+                    Literatura académica generada el {new Date(citations.generatedAt).toLocaleString()}
                   </p>
                 </div>
               </CardContent>
@@ -529,9 +580,10 @@ export default function NoFake() {
                 <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
                   <BookOpen className="w-6 h-6 text-blue-600" />
                 </div>
-                <CardTitle>Citas Académicas</CardTitle>
+                <CardTitle>Literatura Académica</CardTitle>
                 <CardDescription>
-                  Para contenido verificado, proporcionamos citas académicas relevantes en formato APA7 o IEEE.
+                  Para contenido verificado, buscamos investigación académica específicamente relacionada con el tema
+                  analizado.
                 </CardDescription>
               </CardHeader>
             </Card>
