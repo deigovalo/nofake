@@ -115,7 +115,7 @@ export async function POST(request: NextRequest) {
     // Usar Gemini 2.0 Flash para generar citas académicas relacionadas específicamente con el texto analizado
     const { text } = await generateText({
       model: google("gemini-2.0-flash", {
-        apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY || "AIzaSyBqhARrWAobZ6_PvW47vGjdptULQpu9EMQ",
+        apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY,
       }),
       system: `Eres un investigador académico experto. Tu tarea es buscar y generar citas académicas específicamente relacionadas con el contenido del texto analizado.
 
